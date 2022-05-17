@@ -19,6 +19,9 @@ It is used to define a different name for the file that is shown in the ToC.
 If not provided the filename without the file ending `.md` will be displayed.
 In the filename `-` or `_` will be replaced by a space.
 
+The ToC will be created within the lines `<!-- beginnGlobalToC -->` and `<!-- endGlobalToC -->`.
+The position of the toc will be by default under the `<!-- fileHierarchyPosition: <Position>   -->` line.
+A different position can be defined by setting `<!-- beginnGlobalToC -->` at this position.
 
 ## Features
 

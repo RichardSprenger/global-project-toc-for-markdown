@@ -7,17 +7,7 @@ function getFiles() {
 	return vscode.workspace.findFiles('**/*.md', null, 100);
 }
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	
-
-	console.log('Running');
-
-	// let disposable = vscode.commands.registerCommand('global-project-toc.helloWorld', () => {
-	// 	vscode.window.showInformationMessage('Hello World from global-project-toc!');
-	// });
-
 	context.subscriptions.push(
 		vscode.commands.registerCommand('global-project-toc.createHeader', createHeader),
 		vscode.commands.registerCommand('global-project-toc.createFooter', createFooter)
@@ -81,12 +71,14 @@ function getProjectStructure(): Promise<Structure[]> {
 	})
 }
 
+// ToDo: Delete this function for release
 function printStruct(structure: Structure) {
 	let pos = "";
 	structure.position.forEach(elem => pos += elem + ".");
 	console.log("File: " + structure.filename + " - Position: " + pos + " - ContentName: " + structure.contentName + " - Path: " + structure.path);
 }
 
+// ToDo: Delete this function for release
 function printStructs(structure: Structure[]) {
 	structure.forEach(file => {
 		printStruct(file);
@@ -148,6 +140,8 @@ function writeHeaderToFile(structure: Structure[]) {
 						let endLine = content.findIndex(line => line.match("(<!-- endGlobalToC -->)"));
 						if (endLine !== -1) {
 							end = new vscode.Position(endLine, 22);
+						} else {
+							end = new vscode.Position(start, 25);
 						}
 					} else {
 						start = content.findIndex(line => line.match("(fileHierarchyPosition)")) + 1;
@@ -165,17 +159,17 @@ function writeHeaderToFile(structure: Structure[]) {
 }
 
 async function createHeader() {
-	console.log("Creating header");
+	vscode.window.showInformationMessage('Creating the ToC in each file');
 	let structure = await getProjectStructure();
 	structure = sortStructure(structure);
 
 	// printStructs(structure);
 	await writeHeaderToFile(structure);
-	console.log("Done!");
+	vscode.window.showInformationMessage('ToC created');
 }
 
 function createFooter() {
-
+	vscode.window.showInformationMessage('This command is currently not supported');
 }
 
 // this method is called when your extension is deactivated
