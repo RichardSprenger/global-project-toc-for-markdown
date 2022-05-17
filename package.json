@@ -18,7 +18,7 @@
 		"commands": [
 			{
 				"command": "global-project-toc.createHeader",
-				"title": "Create the Header"
+				"title": "Create Header for global Toc"
 			},
 			{
 				"command": "global-project-toc.createFooter",
