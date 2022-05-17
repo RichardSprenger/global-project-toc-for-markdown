@@ -31,6 +31,9 @@ Current Features:
 Future idears:
 - Create a navigation at the bottom of the file to jump to the file next or previous in the toc.
 - Create a configuration to define different parameters.
+  - Change file types that are considered
+  - Change text of headline
+- Add option to automatically place string before of after toc.
 
 ## Requirements
 
