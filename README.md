@@ -58,10 +58,19 @@ Please feel free get in touch if any issues come up.
 ## Release Notes
 
 Initial release.
-Currently only support for rudimentary creation of the ToC
+Currently only support for rudimentary creation of the ToC and footer
 
-### 1.0.0
+### 0.0.1
 
 Initial release
 
+
+### 0.0.2
+
+Added support to generate footer
+
+### 0.0.3
+
+Fixed Bug in Footer generation
+Fixed Bug in BackToRoot link
 -----------------------------------------------------------------------------------------------------------
