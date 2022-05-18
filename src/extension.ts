@@ -19,6 +19,7 @@ interface Structure {
 	path: string;
 	position: number[];
 	contentName: string;
+	uri: vscode.Uri;
 }
 
 function getEOLToString(endOfLine: vscode.EndOfLine): string {
@@ -38,10 +39,9 @@ function getEOLToString(endOfLine: vscode.EndOfLine): string {
 function getProjectStructure(): Promise<Structure[]> {
 	return new Promise<Structure[]>(resolve => {
 		setTimeout(() => {
-			let i = 0;
 			let structure: Structure[] = [];
 			let files = getFiles();
-			
+			let i = 0;
 			files.then(f => {
 				f.forEach(file => {
 					let path = vscode.workspace.asRelativePath(file.fsPath);
@@ -49,40 +49,26 @@ function getProjectStructure(): Promise<Structure[]> {
 					let name = tmpName === undefined ? `FileNotFound` : tmpName;
 					vscode.workspace.openTextDocument(file)
 								.then(doc => {
-										// ToDo maybe do with getWordRangeAtPosition 
-										let infoLine = doc.getText().split(getEOLToString(doc.eol)).find(line => line.match("(fileHierarchyPosition)"))?.split(';');
-										if (infoLine) {
-											let contentName;
-											// Check if content Name and position are valid strings
-											if (infoLine.length > 1) {
-												contentName = infoLine[1].split(':')[1].replaceAll(" -->", "").replaceAll(" ", "");
-											}
-											else {contentName = name.replace(".md", "").replaceAll("-", " ").replaceAll("_", " ");}
-											let position = infoLine[0].split(':')[1].replaceAll(" -->", "").replaceAll(" ", "").replaceAll("\r", "").split('.').map(x => parseInt(x));
-											
-											structure.push({"filename": name , "path": path, "position": position, "contentName": contentName});
-											if (i == f.length - 1) {resolve(structure);}
-											i++;
+									// ToDo maybe do with getWordRangeAtPosition 
+									let infoLine = doc.getText().split(getEOLToString(doc.eol)).find(line => line.match("(fileHierarchyPosition)"))?.split(';');
+									if (infoLine !== undefined) {
+										let contentName;
+										// Check if content Name and position are valid strings
+										if (infoLine.length > 1) {
+											contentName = infoLine[1].split(':')[1].replaceAll(" -->", "").replaceAll(" ", "");
 										}
-						});
+										else {contentName = name.replace(".md", "").replaceAll("-", " ").replaceAll("_", " ");}
+										let position = infoLine[0].split(':')[1].replaceAll(" -->", "").replaceAll(" ", "").replaceAll("\r", "").split('.').map(x => parseInt(x));
+										
+										structure.push({"filename": name , "path": path, "position": position, "contentName": contentName, "uri": file});
+									}
+									if (i === f.length - 1) {resolve(structure);}
+									i++;
+								});
 				});
 			});
 		}, 2000);
 	})
-}
-
-// ToDo: Delete this function for release
-function printStruct(structure: Structure) {
-	let pos = "";
-	structure.position.forEach(elem => pos += elem + ".");
-	console.log("File: " + structure.filename + " - Position: " + pos + " - ContentName: " + structure.contentName + " - Path: " + structure.path);
-}
-
-// ToDo: Delete this function for release
-function printStructs(structure: Structure[]) {
-	structure.forEach(file => {
-		printStruct(file);
-	});
 }
 
 function sortStructure(structure: Structure[]): Structure[] {
@@ -99,11 +85,25 @@ function sortStructure(structure: Structure[]): Structure[] {
 	});
 }
 
-function createGlobalToc(structure: Structure[], f: vscode.Uri, endOfLine: string): string {
-	let text = endOfLine + "<!-- beginnGlobalToC -->" + endOfLine + "# Global ToC" + endOfLine;
-	structure.forEach(struct => {
-		let fileDepth = vscode.workspace.asRelativePath(f.fsPath).split("/");
-		let lineIsCurrentFile = (vscode.workspace.asRelativePath(f.fsPath) == struct.path);
+function getFileLinkRelativeToCurrentFile(currentFilePath: string, fileToLink: string): string {
+	let fileDepth = currentFilePath.split('/').length;
+	let link = "";
+	for (let i = 0; i < fileDepth - 1; i++) {
+		link += "../";
+	}
+	return link + fileToLink;
+}
+
+function createGlobalToc(structure: Structure[], f: string, endOfLine: string): string {
+	let text = "<!-- beginnGlobalToC -->" + endOfLine;
+	let root = structure.find(struct => struct.position[0] === 0);
+	if (root && f !== root.path) {
+		text += "[:arrow_left: Back to Overview](" + root.path + ")" + endOfLine + endOfLine;
+	}
+	text += "# Global ToC" + endOfLine;
+	structure.filter(struct => struct.path != root?.path).forEach(struct => {
+		let fileDepth = f.split("/");
+		let lineIsCurrentFile = (f === struct.path);
 		for (let i = 0; i < struct.position.length - 1; i++) {
 			text += "\t";
 		}
@@ -112,28 +112,23 @@ function createGlobalToc(structure: Structure[], f: vscode.Uri, endOfLine: strin
 		if (lineIsCurrentFile) {text += " **";}
 		else {text += " ";}
 		text += "[" + struct.contentName + "](";
-		for (let i = 0; i < fileDepth.length - 1; i++) {
-			text += "../";
-		}
-		text += struct.path + ")";
+		text += getFileLinkRelativeToCurrentFile(f, struct.path)  + ")";
 		if (lineIsCurrentFile) {text += "**";}
 		text += endOfLine;
 	});
-	text += "---" + endOfLine + "<!-- endGlobalToC -->" + endOfLine;
+	text += "---" + endOfLine + "<!-- endGlobalToC -->";
 	return text;
 }	
 
 function writeHeaderToFile(structure: Structure[]) {
 	return new Promise(resolve => {
 		setTimeout(() => {
-			
-			let files = getFiles();
-			files.then(files => files.forEach(f => {
-				let doc = vscode.workspace.openTextDocument(f);
+			structure.forEach(struct => {
+				let doc = vscode.workspace.openTextDocument(struct.uri);
 				doc.then(doc => {
 					let edit = new vscode.WorkspaceEdit();
 					let end = new vscode.Position(0, 0);
-					let text = createGlobalToc(structure, f, getEOLToString(doc.eol));
+					let text = createGlobalToc(structure, struct.path, getEOLToString(doc.eol));
 					let content = doc.getText().split(getEOLToString(doc.eol));
 					let start = content.findIndex(line => line.match("(<!-- beginnGlobalToC -->)"));
 					if (start !== -1) {
@@ -148,28 +143,69 @@ function writeHeaderToFile(structure: Structure[]) {
 
 						text = content[start-1] + text; 
 					}					
-					edit.replace(f, new vscode.Range(new vscode.Position(start, 0), end), text);
+					edit.replace(struct.uri, new vscode.Range(new vscode.Position(start, 0), end), text);
 					vscode.workspace.applyEdit(edit).then(function() {doc.save();});
 				});
 				
-			}));		
+			});		
+			resolve(true);
+		}, 2000);
+	});
+}
+
+function getFooterLine(structure: Structure[], i: number, endOfLine: string) {
+	let footerLine = '<!-- footerPosition -->' + endOfLine + '---' +  endOfLine + '<div align="center">';
+	if (i !== 0) {
+		footerLine += '[:arrow_backward: Previous](' 
+			+ getFileLinkRelativeToCurrentFile(structure[i].path, structure[i-1].path) + ')';
+		if (i !== structure.length - 1) {
+			footerLine += " | ";
+		}
+	}
+	if (i !== structure.length - 1) {
+		footerLine += '[Next :arrow_forward:](' 
+			+ getFileLinkRelativeToCurrentFile(structure[i].path, structure[i+1].path)  + ')';
+	}
+	footerLine += '</div>';
+	return footerLine;
+}
+
+function writeFooterToFile(structure: Structure[]) {
+	return new Promise(resolve => {
+		setTimeout(() => {
+			for (let i = 0; i < structure.length; i++) {
+				let doc = vscode.workspace.openTextDocument(structure[i].uri);
+				doc.then(doc => {
+					let edit = new vscode.WorkspaceEdit();
+					
+					let content = doc.getText().split(getEOLToString(doc.eol));
+					let footerPos = content.findIndex(line => line.match("(<!-- footerPosition -->)"));
+					footerPos = footerPos === -1 ? content.length : footerPos;
+					edit.replace(structure[i].uri, new vscode.Range(new vscode.Position(footerPos, 0), new vscode.Position(footerPos + 2, content[footerPos + 2].length + 1)), getFooterLine(structure, i, getEOLToString(doc.eol)));
+					vscode.workspace.applyEdit(edit).then(function() {doc.save();});
+				});
+			}
 			resolve(true);
 		}, 2000);
 	});
 }
 
 async function createHeader() {
-	vscode.window.showInformationMessage('Creating the ToC in each file');
+	vscode.window.showInformationMessage('Creating the global ToC in each file');
 	let structure = await getProjectStructure();
 	structure = sortStructure(structure);
 
-	// printStructs(structure);
 	await writeHeaderToFile(structure);
-	vscode.window.showInformationMessage('ToC created');
+	vscode.window.showInformationMessage('ToC was created');
 }
 
-function createFooter() {
-	vscode.window.showInformationMessage('This command is currently not supported');
+async function createFooter() {
+	vscode.window.showInformationMessage('Creating the footer in each file');
+	let structure = await getProjectStructure();
+	structure = sortStructure(structure);
+
+	await writeFooterToFile(structure);
+	vscode.window.showInformationMessage('Footer was created');
 }
 
 // this method is called when your extension is deactivated
