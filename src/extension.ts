@@ -98,7 +98,7 @@ function createGlobalToc(structure: Structure[], f: string, endOfLine: string): 
 	let text = "<!-- beginnGlobalToC -->" + endOfLine;
 	let root = structure.find(struct => struct.position[0] === 0);
 	if (root && f !== root.path) {
-		text += "[:arrow_left: Back to Overview](" + root.path + ")" + endOfLine + endOfLine;
+		text += "[:arrow_left: Back to Overview](" + getFileLinkRelativeToCurrentFile(f, root.path) + ")" + endOfLine + endOfLine;
 	}
 	text += "# Global ToC" + endOfLine;
 	structure.filter(struct => struct.path != root?.path).forEach(struct => {
@@ -177,11 +177,14 @@ function writeFooterToFile(structure: Structure[]) {
 				let doc = vscode.workspace.openTextDocument(structure[i].uri);
 				doc.then(doc => {
 					let edit = new vscode.WorkspaceEdit();
-					
 					let content = doc.getText().split(getEOLToString(doc.eol));
 					let footerPos = content.findIndex(line => line.match("(<!-- footerPosition -->)"));
-					footerPos = footerPos === -1 ? content.length : footerPos;
-					edit.replace(structure[i].uri, new vscode.Range(new vscode.Position(footerPos, 0), new vscode.Position(footerPos + 2, content[footerPos + 2].length + 1)), getFooterLine(structure, i, getEOLToString(doc.eol)));
+					if (footerPos === -1) {
+						footerPos = content.length + 1;
+						edit.insert(structure[i].uri, new vscode.Position(footerPos, 0), getEOLToString(doc.eol));
+					}
+					let characterEnd = content[footerPos + 2] === undefined ? 0 : content[footerPos + 2].length;
+					edit.replace(structure[i].uri, new vscode.Range(new vscode.Position(footerPos, 0), new vscode.Position(footerPos + 2, characterEnd + 1)), getFooterLine(structure, i, getEOLToString(doc.eol)));
 					vscode.workspace.applyEdit(edit).then(function() {doc.save();});
 				});
 			}
