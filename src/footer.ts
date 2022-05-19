@@ -53,7 +53,7 @@ function getFooterLine(structure: Structure[], i: number, endOfLine: string) {
 		}
 	}
 	if (i !== structure.length - 1) {
-		footerLine += '[Next :arrow_forward:](' 
+		footerLine += '[Next &nbsp;&nbsp;&nbsp;&nbsp;:arrow_forward:](' 
 			+ getFileLinkRelativeToCurrentFile(structure[i].path, structure[i+1].path)  + ')';
 	}
 	footerLine += '</div>';
