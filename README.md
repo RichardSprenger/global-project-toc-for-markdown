@@ -4,9 +4,8 @@ This extension will helps you to create a file structure in mark down to navigat
 
 ## Features
 
-### Current Features
-#### TableOfConetens for global file structure
-This extension can be used to create a Table of Contents for a markdown documentation repository.   
+### TableOfConetens for global file structure
+The command `CTRL` + `SHIFT` + `P` + `Create the Header` will create a table of contents for the project in each File.  
 It will create the global ToC in each file with the line `<!-- fileHierarchyPosition: <Position>   -->`.   
 The `<Position>` parameter defines the files position in the global context.   
 The `<Position>` parameter must look like this: `<TopLevel>.<SubLevel>.<SubSubLevel>. ... .<SubSubLevel>`   
@@ -37,15 +36,12 @@ The command `CTRL` + `SHIFT` + `P` + `Create the Footer` will create a navigatio
 If `<!-- footerPosition -->` is found in the file, command will replace this and the next two lines with the footer.
 If it is not found the footer will be created at the end of the file.
 
+### Write the project structure to file
+The command `CTRL` + `SHIFT` + `P` + `Write project structure to file` will write the project structure that is displayed in each file to a yml file.
+Afterwards the file can be used to load the project structure
+
 ### Future ideas:
-- Create a configuration to define different parameters.
-  - Change file types that are considered
-  - Change text of headline
-- Add option to automatically place string before of after toc.
-
-## Extension Settings
-
-Currently not supported
+- Update the `<!-- fileHierarchyPosition:  -->` in each file based on the structure provided in the structure file
 
 ## Source
 
@@ -73,4 +69,10 @@ Added support to generate footer
 
 Fixed Bug in Footer generation
 Fixed Bug in BackToRoot link
+
+### 0.0.4
+
+Added configuration parameters
+Added functionality to read project structure from file
+
 -----------------------------------------------------------------------------------------------------------

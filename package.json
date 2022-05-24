@@ -1,8 +1,8 @@
 {
   "name": "global-project-toc",
-  "displayName": "%ext.displayName%",
-  "description": "%ext.description%",
-  "version": "0.0.3",
+  "displayName": "global-project-toc",
+  "description": "Create a toc for markdown in each file of the folder to navigate through the project.",
+  "version": "0.0.4",
   "publisher": "RichardSprenger",
   "engines": {
     "vscode": "^1.67.0"
@@ -27,27 +27,157 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "%config.title%",
+      "title": "global-project-toc",
       "properties": {
         "global-project-toc.files.supportedFileTypes": {
+          "type": "GlobePattern",
+          "default": "**/*.md",
+          "markdownDescription": "A GlobPattern of files that should checked for the toc"
+        },
+        "global-project-toc.files.excludedFileTypes": {
+          "type": "GlobPattern",
+          "default": "",
+          "markdownDescription": "A GlobPattern of files that should be excluded"
+        },
+        "global-project-toc.files.maximumFilesToConsiderForToC": {
+          "type": "number",
+          "default": "100",
+          "markdownDescription": "Defines how many files should be checked if they will be included in the toc"
+        },
+        "global-project-toc.files.fileHierarchyPositionKeyWord": {
           "type": "string",
-          "default": "md",
-          "markdownDescription": "%global-project-toc.files.supportedFileTypes%"
+          "default": "fileHierarchyPosition",
+          "markdownDescription": "KeyWord after which the hierarchy position is defined."
+        },
+        "global-project-toc.files.keyWordValueSeparator": {
+          "type": "string",
+          "default": ":",
+          "markdownDescription": "Character used to separate the keywords from the values."
+        },
+        "global-project-toc.files.fileContentNameKeyWord": {
+          "type": "string",
+          "default": "fileContentName",
+          "markdownDescription": "KeyWord after which the new file name is defined."
+        },
+        "global-project-toc.files.fileHierarchyPositionAndFileContentNameSeparator": {
+          "type": "string",
+          "default": ";",
+          "markdownDescription": "Character that separates the position from the name part."
+        },
+        "global-project-toc.files.defaultFileContentName": {
+          "type": "string",
+          "default": "FileNameNotFound",
+          "markdownDescription": "The name that will be displayed in the toc if no other file name can be found."
+        },
+        "global-project-toc.files.charactersToBeReplacedCharactersInFileName": {
+          "type": "RegExp",
+          "default": "[-_]",
+          "markdownDescription": "A Regex of characters that should be replaced with a whitespace in the file name"
+        },
+        "global-project-toc.header.beginnGlobalToCKeyWord": {
+          "type": "string",
+          "default": "beginnGlobalToC",
+          "markdownDescription": "KeyWord thats defines the start of the global toc section. All content between this and the end string will be replaced with the new toc."
+        },
+        "global-project-toc.header.endGlobalToCKeyWord": {
+          "type": "string",
+          "default": "endGlobalToCString",
+          "markdownDescription": "KeyWord thats defines the end of the global toc section. All content between this and the start string will be replaced with the new toc."
+        },
+        "global-project-toc.header.additionalTextBeforeToC": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Text that will be inserted bevor the global project ToC."
+        },
+        "global-project-toc.header.additionalTextAfterToC": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Text that will be inserted after the global project ToC."
+        },
+        "global-project-toc.header.insertBackToOverviewLink": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "If true a link will be inserted in each file back to the file with filePosition 0."
+        },
+        "global-project-toc.header.backToOverviewLinkText": {
+          "type": "string",
+          "default": ":arrow_left: Back to Overview",
+          "markdownDescription": "Text that will be inserted in the link back to the overview."
+        },
+        "global-project-toc.header.globalToCHeadlineText": {
+          "type": "string",
+          "default": "# Global ToC",
+          "markdownDescription": "Headline text that will be inserted just above the header."
+        },
+        "global-project-toc.header.currentLineInBold": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "If true the currently open file will be bold."
+        },
+        "global-project-toc.header.drawLineAfterHeader": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Draw --- to display a line in markdown after the global toc."
+        },
+        "global-project-toc.footer.footerPositionKeyWord": {
+          "type": "string",
+          "default": "footerPosition",
+          "markdownDescription": "String thats defines position of the footer."
+        },
+        "global-project-toc.footer.drawLineBeforeFooter": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Draw --- to display a line in markdown before the footer."
+        },
+        "global-project-toc.footer.previousText": {
+          "type": "string",
+          "default": ":arrow_backward: Previous",
+          "markdownDescription": "Text that is displayed for the link to the previous file."
+        },
+        "global-project-toc.footer.nextText": {
+          "type": "string",
+          "default": "Next &nbsp;&nbsp;&nbsp;&nbsp;:arrow_forward:",
+          "markdownDescription": "Text that is displayed for the link to the next file."
+        },
+        "global-project-toc.footer.separator": {
+          "type": "string",
+          "default": "|",
+          "markdownDescription": "Character that is used to separate the previous and next text"
+        },
+        "global-project-toc.footer.additionalTextBeforeToC": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Text that will be inserted bevor the footer."
+        },
+        "global-project-toc.footer.additionalTextAfterToC": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Text that will be inserted after the footer."
+        },
+        "global-project-toc.structure.structureFileName": {
+          "type": "string",
+          "default": "project-structure",
+          "markdownDescription": "File name of the file that contains the project structure or where the structure will be written to."
+        },
+        "global-project-toc.structure.createStructureBasedOnPositionKeyWord": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "If true the extension searches all files for the %global-project-toc.files.fileHierarchyPositionKeyWord% keyword to create the toc and the footer. If false the %global-project-toc.files.structureFileName% File will be used to get the structure."
         }
       }
     },
     "commands": [
       {
         "command": "global-project-toc.createHeader",
-        "title": "Create Header for global Toc"
+        "title": "Global-Project-ToC: Create Header"
       },
       {
         "command": "global-project-toc.createFooter",
-        "title": "Create the Footer"
+        "title": "Global-Project-ToC: Create the Footer"
       },
       {
         "command": "global-project-toc.writeProjectStructure",
-        "title": "Write the project structure to file"
+        "title": "Global-Project-ToC: Write project structure to file"
       }
     ]
   },
