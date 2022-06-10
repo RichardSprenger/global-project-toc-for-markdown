@@ -2,7 +2,7 @@
   "name": "global-project-toc",
   "displayName": "global-project-toc",
   "description": "Create a toc for markdown in each file of the folder to navigate through the project.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "RichardSprenger",
   "engines": {
     "vscode": "^1.67.0"

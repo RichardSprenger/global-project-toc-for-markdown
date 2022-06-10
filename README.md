@@ -75,4 +75,9 @@ Fixed Bug in BackToRoot link
 Added configuration parameters
 Added functionality to read project structure from file
 
+### 0.0.5
+
+Fixed Bug in generation of Footer
+Changed parameters in config
+
 -----------------------------------------------------------------------------------------------------------
