@@ -27,15 +27,17 @@ function writeFooterToFile(structure: Structure[]) {
 				doc.then(doc => {
 					let edit = new WorkspaceEdit();
 					let content = doc.getText().split(getEOLToString(doc.eol));
-					let footerPos = content.findIndex(line => line.match("(<!-- " + getConfiguration("footer.footerPositionKeyWord") as string + " -->)"));
+					let footerPos = content.findIndex(line => line.match("(<!-- " + getConfiguration("footer.beginnFooterPositionKeyWord") as string + " -->)"));
 					if (footerPos === -1) {
 						footerPos = content.length + 1;
 						edit.insert(structure[i].uri, new Position(footerPos, 0), getEOLToString(doc.eol));
 					}
-					let characterEnd = content[footerPos + 2] === undefined ? 0 : content[footerPos + 2].length;
+					let footerEndPos = content.findIndex(line => line.match("(<!-- " + getConfiguration("footer.endFooterPositionKeyWord") as string + " -->)")) 
+					footerEndPos = footerEndPos === -1 ? footerPos + 4 : footerEndPos;
+					let characterEnd = content[footerEndPos] === undefined ? 0 : content[footerEndPos].length;
 					edit.replace(
                         structure[i].uri, new Range(new Position(footerPos, 0), 
-                        new Position(footerPos + 2, characterEnd + 1)), 
+                        new Position(footerEndPos, characterEnd + 1)), 
                         getFooterLine(structure, i, getEOLToString(doc.eol))
                     );
 					workspace.applyEdit(edit).then(function() {doc.save();});
@@ -47,7 +49,7 @@ function writeFooterToFile(structure: Structure[]) {
 }
 
 function getFooterLine(structure: Structure[], i: number, endOfLine: string) {
-	let footerLine = "<!-- " + getConfiguration("footer.footerPositionKeyWord") as string+ " -->" + endOfLine;
+	let footerLine = "<!-- " + getConfiguration("footer.beginnFooterPositionKeyWord") as string+ " -->" + endOfLine;
 	if (getConfiguration("footer.drawLineBeforeFooter") as boolean) {footerLine += "---" + endOfLine;}
 	footerLine += getConfiguration("footer.additionalTextBeforeToC") as string + endOfLine;
 	footerLine += '<div align="center">';
@@ -64,5 +66,6 @@ function getFooterLine(structure: Structure[], i: number, endOfLine: string) {
 	}
 	footerLine += "</div>";
 	footerLine += getConfiguration("footer.additionalTextAfterToC") as string + endOfLine;
+	footerLine += "<!-- " + getConfiguration("footer.endFooterPositionKeyWord") as string+ " -->";
 	return footerLine;
 }

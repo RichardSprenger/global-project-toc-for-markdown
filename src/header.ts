@@ -30,9 +30,9 @@ function writeHeaderToFile(structure: Structure[]) {
 					let end = new Position(0, 0);
 					let text = createGlobalToc(structure, struct.path, getEOLToString(doc.eol));
 					let content = doc.getText().split(getEOLToString(doc.eol));
-					let start = content.findIndex(line => line.match("(<!-- " + getConfiguration("header.beginnGlobalToCKeyWord") as string+ " -->)"));
+					let start = content.findIndex(line => line.match("(<!-- " + getConfiguration("header.beginnGlobalTocKeyWord") as string+ " -->)"));
 					if (start !== -1) {
-						let endLine = content.findIndex(line => line.match("(<!-- " + getConfiguration("header.endGlobalToCKeyWord") as string + " -->)"));
+						let endLine = content.findIndex(line => line.match("(<!-- " + getConfiguration("header.endGlobalTocKeyWord") as string + " -->)"));
 						if (endLine !== -1) {
 							end = new Position(endLine, 22);
 						} else {
@@ -41,7 +41,7 @@ function writeHeaderToFile(structure: Structure[]) {
 					} else {
 						start = content.findIndex(line => line.match("(" + getConfiguration("files.fileHierarchyPositionKeyWord") as string + ")")) + 1;
 
-						text = content[start-1] + text; 
+						text = content[start - 1] + getEOLToString(doc.eol) + text; 
 					}					
 					edit.replace(struct.uri, new Range(new Position(start, 0), end), text);
 					workspace.applyEdit(edit).then(function() {doc.save();});
@@ -54,7 +54,7 @@ function writeHeaderToFile(structure: Structure[]) {
 }
 
 function createGlobalToc(structure: Structure[], f: string, endOfLine: string): string {
-	let text = "<!-- " + getConfiguration("header.beginnGlobalToCKeyWord") as string + " -->" + endOfLine;
+	let text = "<!-- " + getConfiguration("header.beginnGlobalTocKeyWord") as string + " -->" + endOfLine;
 	let root = structure.find(struct => struct.position[0] === 0);
 	if (root && f !== root.path && getConfiguration("header.insertBackToOverviewLink") as boolean) {
 		text += "[" + getConfiguration("header.backToOverviewLinkText") as string + "](" + getFileLinkRelativeToCurrentFile(f, root.path) + ")" + endOfLine;

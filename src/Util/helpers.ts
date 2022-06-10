@@ -10,7 +10,7 @@ export function getFiles(): Thenable<Uri[]> {
 	return workspace.findFiles(
 		getConfiguration('files.supportedFileTypes') as GlobPattern, 
 		getConfiguration('files.excludedFileTypes') as GlobPattern, 
-		getConfiguration('files.maximumFilesToConsiderForToC') as number);
+		getConfiguration('files.maximumFilesToBeConsiderForToC') as number);
 }
 
 /*
@@ -77,12 +77,11 @@ export function getProjectStructureFromStructureFile(baseUri: string, fileUri: s
 		setTimeout(() => {
 			workspace.openTextDocument(fileUri)
 				.then(doc => {
-					console.log("Hallo")
 					let structure = parse(doc.getText()) as Structure[];
 					structure.forEach(struct => {
 						struct.uri = Uri.file(baseUri + "/" + struct.path);
 						let pos = struct.position.toString();
-						struct.position = pos.split('.').map(x => parseInt(x));
+						struct.position = pos.split('.').map(x => parseInt(x)).filter(Boolean);	// Map String to Number array and filter out all NaN values
 					});
 					resolve(structure);
 				});

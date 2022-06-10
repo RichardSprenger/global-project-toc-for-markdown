@@ -39,7 +39,7 @@
           "default": "",
           "markdownDescription": "A GlobPattern of files that should be excluded"
         },
-        "global-project-toc.files.maximumFilesToConsiderForToC": {
+        "global-project-toc.files.maximumFilesToBeConsiderForToC": {
           "type": "number",
           "default": "100",
           "markdownDescription": "Defines how many files should be checked if they will be included in the toc"
@@ -74,14 +74,14 @@
           "default": "[-_]",
           "markdownDescription": "A Regex of characters that should be replaced with a whitespace in the file name"
         },
-        "global-project-toc.header.beginnGlobalToCKeyWord": {
+        "global-project-toc.header.beginnGlobalTocKeyWord": {
           "type": "string",
           "default": "beginnGlobalToC",
           "markdownDescription": "KeyWord thats defines the start of the global toc section. All content between this and the end string will be replaced with the new toc."
         },
-        "global-project-toc.header.endGlobalToCKeyWord": {
+        "global-project-toc.header.endGlobalTocKeyWord": {
           "type": "string",
-          "default": "endGlobalToCString",
+          "default": "endGlobalToC",
           "markdownDescription": "KeyWord thats defines the end of the global toc section. All content between this and the start string will be replaced with the new toc."
         },
         "global-project-toc.header.additionalTextBeforeToC": {
@@ -119,9 +119,14 @@
           "default": "true",
           "markdownDescription": "Draw --- to display a line in markdown after the global toc."
         },
-        "global-project-toc.footer.footerPositionKeyWord": {
+        "global-project-toc.footer.beginnFooterPositionKeyWord": {
           "type": "string",
-          "default": "footerPosition",
+          "default": "beginnFooterPosition",
+          "markdownDescription": "String thats defines position of the footer."
+        },
+        "global-project-toc.footer.endFooterPositionKeyWord": {
+          "type": "string",
+          "default": "endFooterPosition",
           "markdownDescription": "String thats defines position of the footer."
         },
         "global-project-toc.footer.drawLineBeforeFooter": {
